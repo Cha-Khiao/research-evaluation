@@ -1,17 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import { Group } from "@/models/Group";
 import { Room } from "@/models/Room";
 
 export async function GET(
-  req: Request,
-  { params }: { params: { groupId: string } }
+  req: NextRequest, // 🚨 เปลี่ยนจาก Request เป็น NextRequest
+  { params }: { params: Promise<{ groupId: string }> } // 🚨 แก้ Type ตรงนี้ให้เป็น Promise
 ) {
   try {
     await connectToDatabase();
     
-    // ดึง groupId จาก URL parameters (รองรับ Next.js เวอร์ชันใหม่)
-    const groupId = (await params).groupId;
+    // 🚨 แกะค่า Promise ออกมาก่อนใช้งาน
+    const resolvedParams = await params;
+    const groupId = resolvedParams.groupId;
 
     // หากลุ่มที่ถูกประเมิน
     const targetGroup = await Group.findById(groupId);
